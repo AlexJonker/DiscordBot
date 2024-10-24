@@ -7,6 +7,10 @@ from configparser import ConfigParser
 config = ConfigParser()
 config.read('config.ini')
 
+
+# !!!!!! https://www.youtube.com/watch?v=oYci7dtCT7c !!!!!!
+
+
 bot = commands.Bot(command_prefix=config.get('main', 'prefix'), intents = discord.Intents.all())
 
 
@@ -21,21 +25,29 @@ async def on_message(message):
     await bot.process_commands(message)
 
 
-@bot.command()
-async def ping(ctx):
-    '''
-    This text will be shown in the help command
-    '''
 
-    # Get the latency of the bot
-    latency = bot.latency  # Included in the Discord.py library
-    # Send it to the user
-    await ctx.send(latency)
 
 
 @bot.command()
 async def echo(ctx, *, content:str):
+    '''
+    Make the bot say whatever you want.
+    '''
     await ctx.send(content)
+
+
+class SomeCategory:
+    """Category documentations"""
+
+    @bot.command()
+    async def ping(ctx):
+        '''
+        Ping the bot and see the latency.
+        '''
+        latency = bot.latency
+        await ctx.send(latency)
+
+bot.add_cog(SomeCategory())
 
 
 bot.run(os.getenv("TOKEN"))
