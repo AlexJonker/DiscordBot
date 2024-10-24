@@ -9,6 +9,7 @@ config.read('config.ini')
 
 
 # !!!!!! https://www.youtube.com/watch?v=oYci7dtCT7c !!!!!!
+# add cogs
 
 
 bot = commands.Bot(command_prefix=config.get('main', 'prefix'), intents = discord.Intents.all())
