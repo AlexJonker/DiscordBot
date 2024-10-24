@@ -8,7 +8,6 @@ config = ConfigParser()
 config.read('config.ini')
 
 
-# !!!!!! https://www.youtube.com/watch?v=oYci7dtCT7c !!!!!!
 # add cogs
 
 
