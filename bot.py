@@ -33,7 +33,7 @@ async def on_ready():
 	change_status.start()
 
 
-statuslist = cycle([
+statuslist = [
     'Working in da fields',
     'Doing stuff...',
     'Browsing memes 🌐',
@@ -47,7 +47,7 @@ statuslist = cycle([
     'Reading the lore 📖',
     'Just vibin\' 😎',
     'Calculating… still calculating…',
-])
+]
 
 
 
