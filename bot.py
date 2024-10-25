@@ -1,5 +1,6 @@
 from discord.ext import commands, tasks
 import discord
+import random
 from os import *
 from itertools import cycle
 from dotenv import load_dotenv, dotenv_values 
@@ -33,13 +34,25 @@ async def on_ready():
 
 
 statuslist = cycle([
-		'Working in da fields',
-		'Doing stuff...',
-	])
+    'Working in da fields',
+    'Doing stuff...',
+    'Browsing memes 🌐',
+    'Serving the finest pings',
+    'Counting binary sheep 🐑',
+    'In your server, stealing your bandwidth',
+    'Error 404: Status not found',
+    'Beep boop, I am alive',
+    'Running low on coffee ☕',
+    'Upgrading to Bot v2.0',
+    'Reading the lore 📖',
+    'Just vibin\' 😎',
+    'Calculating… still calculating…',
+])
 
 
-@tasks.loop(seconds=1)
+
+@tasks.loop(seconds=60)
 async def change_status():
-	await bot.change_presence(activity=discord.Game(next(statuslist)))
+    await bot.change_presence(activity=discord.Game(random.choice(statuslist)))
 
 bot.run(getenv("TOKEN"))
