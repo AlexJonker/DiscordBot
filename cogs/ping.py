@@ -1,4 +1,3 @@
-# cogs/ping.py
 from discord.ext import commands
 
 class Ping(commands.Cog):
@@ -8,7 +7,7 @@ class Ping(commands.Cog):
     @commands.command(name="ping")
     async def ping(self, ctx):
         """Responds with bot latency in milliseconds."""
-        latency = round(self.bot.latency * 1000)  # Latency in ms
+        latency = round(self.bot.latency * 1000)
         await ctx.send(f'Pong! 🏓 Latency: {latency}ms')
 
 async def setup(bot):

@@ -10,6 +10,9 @@ config.read('config.ini')
 
 bot = commands.Bot(command_prefix=config.get('main', 'prefix'), intents = discord.Intents.all(), description='A simple example of bot made with Discord.py')
 
+bot.remove_command('help')
+
+
 async def load_cogs():
 	for cog in listdir('./cogs'):
 		if cog.endswith('.py'):
