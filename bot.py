@@ -15,22 +15,23 @@ bot.remove_command('help')
 
 
 async def load_cogs():
-	for cog in listdir('./cogs'):
-		if cog.endswith('.py'):
-			try:
-				await bot.load_extension(f'cogs.{cog[:-3]}')
-				print(f'Loaded {cog}')
-			except Exception as e:
-				print(f'Failed to load cog {cog}: {e}')
+    for cog in listdir('./cogs'):
+        if cog.endswith('.py'):
+            try:
+                await bot.load_extension(f'cogs.{cog[:-3]}')
+                print(f'Loaded {cog}')
+            except Exception as e:
+                print(f'Failed to load cog {cog}: {e}')
 
 
 
 @bot.event
 async def on_ready():
-	await load_cogs()
-	print(f'{bot.user.name} is online and ready!')
+    await load_cogs()
+    print(f'{bot.user.name} is online and ready!')
 
-	change_status.start()
+    change_status.start()
+
 
 
 statuslist = [
