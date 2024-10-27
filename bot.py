@@ -47,6 +47,7 @@ statuslist = [
     'Reading the lore 📖',
     'Just vibin\' 😎',
     'Calculating… still calculating…',
+    'With ur mom'
 ]
 
 
