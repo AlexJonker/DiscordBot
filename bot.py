@@ -17,7 +17,6 @@ config = builder.parse_config('config.json')
 
 bot = commands.Bot(command_prefix=config.prefix, intents = discord.Intents.all())
 
-bot.remove_command("help")
 
 
 async def load_cogs():

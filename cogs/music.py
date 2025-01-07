@@ -1,3 +1,6 @@
+#https://gist.github.com/paradox4280/1d35d6fc96d18918b384a09d2a38a7ea
+
+
 import asyncio
 import functools
 import itertools
