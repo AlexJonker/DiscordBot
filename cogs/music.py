@@ -11,8 +11,6 @@ import discord
 import yt_dlp
 from async_timeout import timeout
 from discord.ext import commands
-import ffmpeg
-import ffprobe
 
 # Silence useless bug reports messages
 yt_dlp.utils.bug_reports_message = lambda: ''
@@ -31,7 +29,6 @@ class YTDLSource(discord.PCMVolumeTransformer):
     YTDL_OPTIONS = {
         'audioquality': 9,
         'format': 'bestaudio',
-        'outtmpl': '{}',
         'restrictfilenames': True,
         'flatplaylist': True,
         'nocheckcertificate': True,
