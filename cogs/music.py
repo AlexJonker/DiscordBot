@@ -8,12 +8,14 @@ import math
 import random
 
 import discord
-import yt_dlp as youtube_dl
+import yt_dlp
 from async_timeout import timeout
 from discord.ext import commands
+import ffmpeg
+import ffprobe
 
 # Silence useless bug reports messages
-youtube_dl.utils.bug_reports_message = lambda: ''
+yt_dlp.utils.bug_reports_message = lambda: ''
 
 
 class VoiceError(Exception):
@@ -23,22 +25,24 @@ class VoiceError(Exception):
 class YTDLError(Exception):
     pass
 
-
+# audioquality 0 best 9 worst
+# format bestaudio/best or worstaudio
 class YTDLSource(discord.PCMVolumeTransformer):
     YTDL_OPTIONS = {
-        'format': 'bestaudio/best',
-        'extractaudio': True,
-        'audioformat': 'mp3',
-        'outtmpl': '%(extractor)s-%(id)s-%(title)s.%(ext)s',
+        'audioquality': 9,
+        'format': 'bestaudio',
+        'outtmpl': '{}',
         'restrictfilenames': True,
-        'noplaylist': True,
+        'flatplaylist': True,
         'nocheckcertificate': True,
-        'ignoreerrors': False,
+        'ignoreerrors': True,
         'logtostderr': False,
-        'quiet': True,
+        "extractaudio": True,
+        "audioformat": "opus",
         'no_warnings': True,
         'default_search': 'auto',
-        'source_address': '0.0.0.0',
+        # bind to ipv4 since ipv6 addresses cause issues sometimes
+        'source_address': '0.0.0.0'
     }
 
     FFMPEG_OPTIONS = {
@@ -46,7 +50,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
         'options': '-vn',
     }
 
-    ytdl = youtube_dl.YoutubeDL(YTDL_OPTIONS)
+    ytdl = yt_dlp.YoutubeDL(YTDL_OPTIONS)
 
     def __init__(self, ctx: commands.Context, source: discord.FFmpegPCMAudio, *, data: dict, volume: float = 0.5):
         super().__init__(source, volume)
@@ -77,23 +81,39 @@ class YTDLSource(discord.PCMVolumeTransformer):
     async def create_source(cls, ctx: commands.Context, search: str, *, loop: asyncio.BaseEventLoop = None):
         loop = loop or asyncio.get_event_loop()
 
-        partial = functools.partial(cls.ytdl.extract_info, search, download=False, process=False)
+        partial = functools.partial(cls.ytdl.extract_info, search, download=False)
         data = await loop.run_in_executor(None, partial)
 
         if data is None:
-            raise YTDLError('Couldn\'t find anything that matches `{}`'.format(search))
+            raise YTDLError(f"Couldn't find anything that matches `{search}`")
 
-        if 'entries' not in data:
-            process_info = data
-        else:
-            process_info = None
-            for entry in data['entries']:
-                if entry:
-                    process_info = entry
-                    break
+        if 'entries' in data:  # This is a playlist
+            playlist = []
+            entries = data['entries']
 
-            if process_info is None:
-                raise YTDLError('Couldn\'t find anything that matches `{}`'.format(search))
+            async def process_entry(entry):
+                if not entry:
+                    return None
+                try:
+                    processed_info = await loop.run_in_executor(
+                        None, functools.partial(cls.ytdl.extract_info, entry['webpage_url'], download=False)
+                    )
+                    return cls(ctx, discord.FFmpegPCMAudio(processed_info['url'], **cls.FFMPEG_OPTIONS), data=processed_info)
+                except Exception as e:
+                    # Log and skip failed entries
+                    print(f"Skipping entry due to error: {e}")
+                    return None
+
+            tasks = [process_entry(entry) for entry in entries]
+            results = await asyncio.gather(*tasks, return_exceptions=False)
+            playlist = [result for result in results if result is not None]
+
+            if not playlist:
+                raise YTDLError("No valid videos found in the playlist.")
+            return playlist  # Return the list of song objects
+
+        # Single video case
+        return cls(ctx, discord.FFmpegPCMAudio(data['url'], **cls.FFMPEG_OPTIONS), data=data)
 
         webpage_url = process_info['webpage_url']
         partial = functools.partial(cls.ytdl.extract_info, webpage_url, download=False)
@@ -464,28 +484,26 @@ class music(commands.Cog):
 
     @commands.command(name='play', aliases=['p'])
     async def _play(self, ctx: commands.Context, *, search: str):
-        """Plays a song.
-
-        If there are songs in the queue, this will be queued until the
-        other songs finished playing.
-
-        This command automatically searches from various sites if no URL is provided.
-        A list of these sites can be found here: https://rg3.github.io/youtube-dl/supportedsites.html
-        """
+        """Plays a song or adds a playlist to the queue."""
 
         if not ctx.voice_state.voice:
             await ctx.invoke(self._join)
 
         async with ctx.typing():
             try:
-                source = await YTDLSource.create_source(ctx, search, loop=self.bot.loop)
+                result = await YTDLSource.create_source(ctx, search, loop=self.bot.loop)
             except YTDLError as e:
-                await ctx.send('An error occurred while processing this request: {}'.format(str(e)))
+                await ctx.send(f"An error occurred while processing this request: {e}")
             else:
-                song = Song(source)
+                if isinstance(result, list):  # It's a playlist
+                    for source in result:
+                        await ctx.voice_state.songs.put(Song(source))
+                    await ctx.send(f"Enqueued playlist: **{search}** with {len(result)} tracks.")
+                else:  # It's a single song
+                    song = Song(result)
+                    await ctx.voice_state.songs.put(song)
+                    await ctx.send(f"Enqueued {str(result)}")
 
-                await ctx.voice_state.songs.put(song)
-                await ctx.send('Enqueued {}'.format(str(source)))
 
     @_join.before_invoke
     @_play.before_invoke
