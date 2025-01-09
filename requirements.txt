@@ -1,7 +1,9 @@
 discord.py
 python-dotenv
 python-json-config
+discord-pretty-help
 
 async_timeout
 yt-dlp
 PyNaCl 
+# https://pypi.org/project/spotify-dlp/#:~:text=spotify%2Ddlp-,Command%20line%20downloader%20for%20spotify%20tracks%2C%20playlists%2C%20albums%20and%20top,result%20by%20using%20yt%2Ddlp.

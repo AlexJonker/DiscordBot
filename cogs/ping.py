@@ -1,6 +1,7 @@
 from discord.ext import commands
 
 class Ping(commands.Cog):
+    """Responds with bot latency in milliseconds"""
     def __init__(self, bot):
         self.bot = bot
 

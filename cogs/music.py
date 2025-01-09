@@ -258,6 +258,7 @@ class VoiceState:
 
 
 class music(commands.Cog):
+    """Play music in a voice channel"""
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.voice_states = {}

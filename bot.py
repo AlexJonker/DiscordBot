@@ -6,16 +6,14 @@ from itertools import cycle
 from dotenv import load_dotenv, dotenv_values 
 load_dotenv() 
 from python_json_config import ConfigBuilder
-
+from pretty_help import PrettyHelp
 
 builder = ConfigBuilder()
 
 config = builder.parse_config('config.json')
 
 
-
-
-bot = commands.Bot(command_prefix=config.prefix, intents = discord.Intents.all())
+bot = commands.Bot(command_prefix=config.prefix, intents = discord.Intents.all(), help_command=PrettyHelp(color=discord.Colour.green()))
 
 
 
